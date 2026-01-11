@@ -14,7 +14,7 @@ const isProcessing = ref(false)
   };
 
   const recognize = async (imageSource:any) => {
-    if (!worker.value) await initOCR('eng');
+    // if (!worker.value) await initOCR('eng');
     
     isRecognizing.value = true;
     try {
@@ -26,6 +26,7 @@ const isProcessing = ref(false)
       return text
     } catch (err) {
       console.error("OCR Error:", err);
+      alert("OCR Error: "+err)
     } finally {
       isProcessing.value = false;
     }

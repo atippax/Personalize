@@ -26,10 +26,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { useOCR } from './composables/useOcr';
-
+const ocr = useOCR()
+ocr.initOCR('eng')
 const videoRef = ref(null);
 const canvasRef = ref(null);
 const isProcessing = ref(false);
@@ -65,7 +66,6 @@ const initCamera = async () => {
     console.error("Camera Error:", err);
   }
 };
-const ocr = useOCR()
 const captureFrame = async () => {
   clearInterval(intervalId);
 
@@ -92,7 +92,7 @@ const captureFrame = async () => {
       debugInfo.time = new Date().toLocaleTimeString();
 
       await sendToServer(blob);
-text.value    = await ocr.recognize(canvas)
+
       startCaptureLoop()
     }
   }, 'image/jpeg', 0.7);
@@ -102,8 +102,11 @@ const sendToServer = async (imageBlob) => {
   isProcessing.value = true;
   try {
     // จำลองการส่ง
-    await new Promise(resolve => setTimeout(resolve, 400)); 
+    text.value    = await ocr.recognize(imageBlob)
+    // await new Promise(resolve => setTimeout(resolve, 400)); 
     console.log("Frame sent successfully");
+  }catch(ex){
+    alert('send '+ex)
   } finally {
     isProcessing.value = false;
   }
