@@ -18,6 +18,7 @@
         <p>Resolution: {{ debugInfo.res }}</p>
         <p>Size: {{ debugInfo.size }} KB</p>
         <p>Last Sync: {{ debugInfo.time }}</p>
+        <p>{{ text }}</p>
       </div>
     </div>
 
@@ -32,7 +33,7 @@ import { useOCR } from './composables/useOcr';
 const videoRef = ref(null);
 const canvasRef = ref(null);
 const isProcessing = ref(false);
-
+const text = ref('')
 // State สำหรับ Debug
 const debugImageUrl = ref(null);
 const debugInfo = reactive({
@@ -91,7 +92,7 @@ const captureFrame = async () => {
       debugInfo.time = new Date().toLocaleTimeString();
 
       await sendToServer(blob);
-console.log(await ocr.recognize(canvas))
+text.value    = await ocr.recognize(canvas)
       startCaptureLoop()
     }
   }, 'image/jpeg', 0.7);
