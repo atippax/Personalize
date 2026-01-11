@@ -31,6 +31,7 @@ import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { useOCR } from './composables/useOcr';
 const ocr = useOCR()
 ocr.initOCR('eng')
+
 const videoRef = ref(null);
 const canvasRef = ref(null);
 const isProcessing = ref(false);
@@ -45,25 +46,41 @@ const debugInfo = reactive({
 
 let stream = null;
 let intervalId = null;
-
 const initCamera = async () => {
   try {
     const constraints = {
       video: {
         facingMode: 'environment',
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
+        width: { min: 640, ideal: 1920, max: 1920 }, 
+        height: { min: 480, ideal: 1080, max: 1080 },
       },
       audio: false
     };
 
     stream = await navigator.mediaDevices.getUserMedia(constraints);
+    
     if (videoRef.value) {
       videoRef.value.srcObject = stream;
+      const track = stream.getVideoTracks()[0];
+      const capabilities = track.getCapabilities();
+      const advancedConstraints: any = {};
+      
+      if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+        advancedConstraints.focusMode = 'continuous';
+      }
+
+      // ถ้าต้องการพยายามสั่งเปิดไฟ Flash หรือตั้งค่าอื่นๆ เพิ่มเติม (ถ้ามี)
+      if (Object.keys(advancedConstraints).length > 0) {
+        await track.applyConstraints({
+          advanced: [advancedConstraints]
+        });
+      }
     }
+    
     startCaptureLoop();
   } catch (err) {
     console.error("Camera Error:", err);
+    alert("ไม่สามารถเปิดกล้องได้: " + err);
   }
 };
 const captureFrame = async () => {
