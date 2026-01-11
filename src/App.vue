@@ -90,10 +90,12 @@ const captureFrame = async () => {
       debugInfo.res = `${canvas.width}x${canvas.height}`;
       debugInfo.size = (blob.size / 1024).toFixed(2);
       debugInfo.time = new Date().toLocaleTimeString();
-
-      await sendToServer(blob);
-
-      startCaptureLoop()
+try{
+  await sendToServer(blob);
+}
+finally{ 
+  startCaptureLoop()
+}
     }
   }, 'image/jpeg', 0.7);
 };
